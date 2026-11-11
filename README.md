@@ -1,10 +1,10 @@
-# <img width="32" height="32" alt="RoSniper" src="https://github.com/user-attachments/assets/628445a0-5e54-41b6-ba5e-dbe9ab6864e0" /> RoSniper
+# <img width="32" height="32" alt="RoSniper-Go" src="https://github.com/user-attachments/assets/628445a0-5e54-41b6-ba5e-dbe9ab6864e0" /> RoSniper
 
 ![GitHub Release](https://img.shields.io/github/v/release/introvertednoob/RoSniper)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/introvertednoob/RoSniper)
 ![GitHub License](https://img.shields.io/github/license/introvertednoob/RoSniper)
 
-A simple Roblox stream sniper :)<br>
+A simple Roblox stream sniper written in go :)<br>
 <br>
 RoSniper uses Roblox's Presence API to check if a given user is online. If so, then it will attempt to join that user.<br>
 **DISCLAIMER: You can ONLY join users that let you join them (ex: you're friended/following them, or the user being sniped has their joins on). RoSniper is NOT a RoSearcher clone or an injectable exploit.**<br>
