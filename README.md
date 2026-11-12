@@ -1,51 +1,137 @@
-# <img width="32" height="32" alt="RoSniper-Go" src="https://github.com/user-attachments/assets/628445a0-5e54-41b6-ba5e-dbe9ab6864e0" /> RoSniper
+# <img width="32" height="32" alt="RoSniper-Go" src="https://github.com/user-attachments/assets/628445a0-5e54-41b6-ba5e-dbe9ab6864e0" /> RoSniper-Go
 
-![GitHub Release](https://img.shields.io/github/v/release/introvertednoob/RoSniper)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/introvertednoob/RoSniper)
-![GitHub License](https://img.shields.io/github/license/introvertednoob/RoSniper)
+![GitHub Release](https://img.shields.io/github/v/release/TheGittlerDiddler/RoSniper-Go)
+![GitHub License](https://img.shields.io/github/license/TheGittlerDiddler/RoSniper-Go)
 
-A simple Roblox stream sniper written in go :)<br>
-<br>
-RoSniper uses Roblox's Presence API to check if a given user is online. If so, then it will attempt to join that user.<br>
-**DISCLAIMER: You can ONLY join users that let you join them (ex: you're friended/following them, or the user being sniped has their joins on). RoSniper is NOT a RoSearcher clone or an injectable exploit.**<br>
-Tested on macOS 15+ and Python 3.13+, but RoSniper likely also works on previous versions of these programs/operating systems.
+A Roblox player presence tracker and automated game joiner built with a terminal user interface (TUI) in Go.
 
-## Notice
-**On 5/4/2026, the Roblox Presence API has been limited by over 13x (1,320 requests/min -> 100 requests/min).**<br>
-You may experience severe rate limiting using the default request delay setting.<br>
-It is recommended to set your request delay to **at least 0.6 seconds**. The latest source version has a default request delay of 1.0 seconds.<br>
-Source: https://devforum.roblox.com/t/roblox-data-stewardship-principles-cookie-based-api-update/4579220<br>
+RoSniper queries Roblox's Presence API to monitor when a target user enters an experience. When a joinable server instance (Job ID) is detected, the program generates an authentication ticket and launches the Roblox desktop client directly into that server.
 
-## Current Features:
-- Snipe users you recently tried to join for easier access
-- Switch between multiple accounts with ease
-- Check for multiple user statuses at the same time
-- Monitor a set of users without join-sniping them
-- Decline the first server which is detected, just in case it's already full
-- Customize your experience through commands or by modifying config.json
-- Set a ZSH alias (macOS only) for easier access to RoSniper from the terminal
-- Build RoSniper into an executable which anyone can run
-- Progressive cookie validation for much faster startup times, especially with lots of accounts
+**Disclaimer:** You can only join users who allow you to join them (e.g., public joins are enabled, or the target is a friend/followed user). RoSniper does not bypass privacy settings, inject into game memory, or operate as an exploit.
 
-## How do I build this from source?
-There is a build script in ./build/ that can be used to build RoSniper for macOS and Windows.<br>
-This creates an executable that anyone (even if they don't have Python) can run.<br>
-Clone this repository and build RoSniper, or just run the source code itself.<br>
+---
 
-# Showcase
-The source code for the trailer can be found in ./trailer/!<br>
+## API Rate Limit Notice
 
-https://github.com/user-attachments/assets/ce0e1e30-59c1-4230-8b34-4dad33136a18
+Roblox's cookie-authenticated Presence API enforces a rate limit of **100 requests per minute** (~0.6 seconds minimum interval per request). 
 
-# Streamer Showcase
-I have stream-sniped multiple streamers using RoSniper!<br>
-So can you, as long as the streamer has their joins on. **Again, this program only works on people you are able to join NORMALLY.**<br>
+To prevent HTTP 429 rate-limiting, RoSniper defaults to a **1.0-second** request interval. If the endpoint returns a 429 status, the client automatically backs off for the duration specified in the `Retry-After` header before resuming.
 
-### For example, I was the only other person in KreekCraft's game on a Dandy's World stream with 4k+ people.<br>
-<img width="1543" height="887" alt="kreekcraft_dandys_world" src="https://github.com/user-attachments/assets/7f9ed94f-2686-4fda-8355-ce01856bd939" />
+Reference: [Roblox Developer Forum: Cookie-Based API Updates](https://devforum.roblox.com/t/roblox-data-stewardship-principles-cookie-based-api-update/4579220)
 
-### I also managed to get into a Pls Donate! server with KreekCraft.<br>
-<img width="1372" height="871" alt="kreekcraft_pls_donate" src="https://github.com/user-attachments/assets/e56e70d4-e9b4-4011-9092-bf0097b48bf9" /><br>
+---
 
-### Less notably, I joined lolcat in a Squid Game clone.<br>
-<img width="772" height="576" alt="lolcat" src="https://github.com/user-attachments/assets/ef34ed8b-636a-4543-86bd-08f2e17e1708" /><br>
+## Features
+
+- **Terminal Interface**: Interactive interface built with Bubble Tea and Lipgloss.
+- **Direct Protocol Dispatch**: Generates single-use authentication launch tickets (`roblox-player:` protocol) with a fallback to deep linking (`roblox://`).
+- **Parallel Cookie Validation**: Validates multiple `.ROBLOSECURITY` account cookies concurrently on startup using goroutines.
+- **Multi-Account Switching**: Store multiple account sessions and switch active accounts directly from the interface.
+- **Batch Monitoring**: Queries up to 50 users in a single HTTP request to monitor player activity without consuming extra rate-limit quota.
+- **Skip Initial Server**: Optional toggle to ignore the first detected server instance to avoid joining full rooms when a streamer is already in an older server.
+- **Target History**: Saves recent usernames to configuration for faster access.
+- **Customizable Controls**: Modify navigation, confirm, and cancel keybinds from within the settings menu.
+- **Flexible Path Resolution**: Operates portably if `config.json` is located next to the executable; otherwise, stores configuration in the user configuration directory (`%APPDATA%\rosniper\` on Windows, `~/.config/rosniper/` on macOS/Linux).
+
+---
+
+## Default Controls
+
+| Action | Primary Key | Alternative Key |
+| :--- | :--- | :--- |
+| Move Up | `W` | `Up Arrow` |
+| Move Down | `S` | `Down Arrow` |
+| Confirm / Select | `V` | `Enter` |
+| Deny / Back / Stop | `B` | `Esc` |
+| Quit Application | `Ctrl + C` | |
+
+*Note: Inside text input prompts (usernames, cookies), letter keys type standard text. `Enter` submits the input, and `Esc` cancels back to the menu.*
+
+---
+
+## Installation
+
+### Pre-compiled Binaries (Recommended)
+
+Pre-built standalone executables for Windows, macOS, and Linux are available under the [Releases](https://github.com/TheGittlerDiddler/RoSniper-Go/releases) section. Download the binary for your platform and run it directly. No installation or external dependencies are required.
+
+### Building from Source
+
+#### Prerequisites
+
+- [Go 1.22+](https://go.dev/dl/)
+
+#### Build Commands
+
+Clone the repository and build the binary:
+
+```bash
+git clone https://github.com/TheGittlerDiddler/RoSniper-Go.git
+cd RoSniper-Go
+```
+
+##### Windows (Standard Build)
+```powershell
+go build -ldflags="-s -w" -o rosniper.exe
+```
+
+##### Windows (100% Statically Linked, No C Runtime Dependencies)
+```powershell
+$env:CGO_ENABLED=0
+go build -ldflags="-s -w -extldflags '-static'" -o rosniper.exe
+```
+
+##### macOS / Linux
+```bash
+CGO_ENABLED=0 go build -ldflags="-s -w" -o rosniper
+```
+
+---
+
+## Running
+
+```powershell
+# Windows
+.\rosniper.exe
+
+# macOS / Linux
+./rosniper
+```
+
+---
+
+## Configuration
+
+Settings and accounts are stored in `config.json`:
+
+```json
+{
+  "accounts": [
+    {
+      "alias": "Main",
+      "cookie": "_|WARNING:-DO-NOT-SHARE-THIS.--...",
+      "user_id": 12345678,
+      "username": "PlayerOne",
+      "valid": true
+    }
+  ],
+  "active_account": "Main",
+  "request_delay_seconds": 1.0,
+  "decline_first_server": false,
+  "recent_targets": [
+    "TargetUser"
+  ],
+  "keybinds": {
+    "up": "w",
+    "down": "s",
+    "confirm": "v",
+    "back": "b"
+  }
+}
+```
+
+---
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE).

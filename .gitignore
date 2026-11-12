@@ -1,12 +1,37 @@
-*.app
+﻿# ==========================================
+# 1. WHITELIST: Ignore everything by default
+# ==========================================
+/*
+
+# ==========================================
+# 2. ALLOWLIST: Only track what is needed
+# ==========================================
+!/.gitignore
+!/README.md
+!/LICENSE
+!/go.mod
+!/go.sum
+!/*.go
+
+# Allow assets directory and its contents
+!/assets/
+!/assets/**
+
+# ==========================================
+# 3. FAILSAFE: Never track sensitive / build files
+# ==========================================
+config.json
 *.exe
+*.app
 *.zip
 *.spec
 *.DS_Store
-*.vscode
+*.vscode/
+.vscode/
 RoSniper-*
-config.json
+rosniper-go.exe
+rosniper.exe
 launcher
-_internal
-__pycache__
-readme-media
+_internal/
+__pycache__/
+readme-media/
