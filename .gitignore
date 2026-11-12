@@ -17,6 +17,10 @@
 !/assets/
 !/assets/**
 
+# Allow GitHub Actions workflows
+!/.github/
+!/.github/**
+
 # ==========================================
 # 3. FAILSAFE: Never track sensitive / build files
 # ==========================================
@@ -31,6 +35,7 @@ config.json
 RoSniper-*
 rosniper-go.exe
 rosniper.exe
+dist/
 launcher
 _internal/
 __pycache__/
